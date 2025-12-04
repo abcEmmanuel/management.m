@@ -1,0 +1,16 @@
+"name": "serverless-expense-tracker",
+  "version": "1.0.0",
+  "description": "A serverless expense tracker API deployed on Vercel.",
+  "main": "api/expenses.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vercel",
+    "serverless",
+    "node",
+    "expense-tracker"
+  ],
+  "author": "",
+  "license": "ISC"
+}
