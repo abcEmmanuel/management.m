@@ -1,20 +1,20 @@
-* Vercel Serverless Function for Expense Tracking
+/**
+ * Vercel Serverless Function for Expense Tracking
  * Endpoint: /api/expenses
  *
- * NOTE: This function uses an in-memory array to store expenses,
- * which means data will be lost between invocations. This is
- * for demonstration purposes only. For persistent storage, a
- * database is required.
+ * NOTE: This function uses an in-memory array to store expenses.
+ * Data is NOT persistent and will be lost between invocations.
+ * This is for demonstration only.
  */
 
-// In-memory data store for demonstration
+// In-memory data store for demonstration (Non-persistent)
 let expenses = [
     { id: 'e1', amount: 45.99, description: 'Groceries at Trader Joe\'s', category: 'Food', date: '2025-11-28' },
     { id: 'e2', amount: 120.00, description: 'Electricity Bill', category: 'Utilities', date: '2025-11-30' },
     { id: 'e3', amount: 25.50, description: 'Coffee with client', category: 'Misc', date: '2025-12-01' },
 ];
 
-// Helper function to validate POST data
+// Helper function to validate POST data fields
 function validateExpense(data) {
     const { amount, description, category, date } = data;
     const errors = [];
@@ -37,7 +37,7 @@ function validateExpense(data) {
 }
 
 module.exports = async (req, res) => {
-    // Enable CORS for the frontend (index.html) to communicate with the API
+    // Set CORS headers for local development and cross-origin access
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -50,36 +50,22 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'GET') {
-        // GET: Return all expenses
+        // GET: Return all expenses, sorted by date descending
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
             success: true, 
-            data: expenses.sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by date descending
+            data: expenses.sort((a, b) => new Date(b.date) - new Date(a.date)) 
         }));
         return;
     }
 
     if (req.method === 'POST') {
         // POST: Add a new expense
-        let body = '';
-        
-        // Read the request body stream
         try {
-            // Note: Vercel's req object often has the body already parsed if it's JSON,
-            // but reading the stream is the safest way in a generic Node.js environment.
-            // For Vercel, we often find the body in req.body directly for POST requests.
-
+            // Vercel parses the request body automatically if Content-Type is application/json
             const newExpense = req.body;
             
-            // Fallback for body parsing if req.body is undefined (less common in Vercel, but robust)
-            if (!newExpense) {
-                 // Simple body parsing logic - reading stream is complex in a simple handler,
-                 // assuming standard Vercel environment where req.body is available for JSON.
-                 // If running into issues, a more complex stream reading is needed.
-                 // For now, assume Vercel provides req.body if Content-Type is application/json.
-            }
-            
-            const validationErrors = validateExpense(newExpense);
+            const validationErrors = validateExpense(newExpense || {}); // Pass empty object if body is missing
 
             if (validationErrors.length > 0) {
                 // Return 400 Bad Request if validation fails
@@ -98,7 +84,7 @@ module.exports = async (req, res) => {
                 amount: parseFloat(newExpense.amount),
                 description: newExpense.description.trim(),
                 category: newExpense.category.trim(),
-                date: newExpense.date, // YYYY-MM-DD format
+                date: newExpense.date,
             };
 
             expenses.push(expense);
