@@ -1,4 +1,5 @@
-"name": "serverless-expense-tracker",
+{
+  "name": "serverless-expense-tracker",
   "version": "1.0.0",
   "description": "A serverless expense tracker API deployed on Vercel.",
   "main": "api/expenses.js",
